@@ -1,0 +1,178 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8" x-data="incidentDashboard()" @new-incident.window="fetchIncidents">
+    <header class="mb-8">
+        <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white">Incident Dashboard</h2>
+        <p class="mt-2 text-lg text-gray-600 dark:text-gray-400">Triage, manage, and resolve incidents with ease.</p>
+    </header>
+
+    <!-- Filters and Search -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+        <div class="md:col-span-2">
+            <label for="semantic-search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Semantic Search</label>
+            <input type="text" id="semantic-search" x-model="semanticSearch" @input.debounce.500ms="performSemanticSearch" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="Describe the incident...">
+        </div>
+        <div>
+            <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+            <select id="category" x-model="category" @change="filterIncidents" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <option value="">All</option>
+                <template x-for="cat in categories" :key="cat">
+                    <option :value="cat" x-text="cat"></option>
+                </template>
+            </select>
+        </div>
+        <div>
+            <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+            <select id="priority" x-model="priority" @change="filterIncidents" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <option value="">All</option>
+                <template x-for="p in priorities" :key="p">
+                    <option :value="p" x-text="p"></option>
+                </template>
+            </select>
+        </div>
+        <div>
+            <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+            <select id="status" x-model="status" @change="filterIncidents" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <option value="">All</option>
+                <template x-for="s in statuses" :key="s">
+                    <option :value="s" x-text="s"></option>
+                </template>
+            </select>
+        </div>
+    </div>
+
+    <!-- Incident Grid -->
+    <div id="incident-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Incidents will be loaded by HTMX -->
+    </div>
+    <div x-show="filteredIncidents.length === 0" class="text-center py-12">
+        <p class="text-xl text-gray-500 dark:text-gray-400">No incidents match your filters.</p>
+    </div>
+</div>
+
+<script>
+    function incidentDashboard() {
+        return {
+            incidents: [],
+            filteredIncidents: [],
+            semanticSearch: '',
+            category: '',
+            priority: '',
+            status: '',
+            categories: [],
+            priorities: [],
+            statuses: [],
+
+            init() {
+                this.fetchIncidents();
+                const socket = io();
+                socket.on('new_incident', (data) => {
+                    this.handleNewIncident(data);
+                });
+            },
+
+            fetchIncidents() {
+                fetch('/api/incidents')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.incidents = data;
+                        this.filteredIncidents = data;
+                        this.updateFilters();
+                        this.renderIncidents();
+                    });
+            },
+
+            updateFilters() {
+                this.categories = [...new Set(this.incidents.map(i => i.category))];
+                this.priorities = [...new Set(this.incidents.map(i => i.priority))];
+                this.statuses = [...new Set(this.incidents.map(i => i.status))];
+            },
+
+            filterIncidents() {
+                this.filteredIncidents = this.incidents.filter(incident => {
+                    const categoryMatch = this.category ? incident.category === this.category : true;
+                    const priorityMatch = this.priority ? incident.priority === this.priority : true;
+                    const statusMatch = this.status ? incident.status === this.status : true;
+                    return categoryMatch && priorityMatch && statusMatch;
+                });
+                this.renderIncidents();
+            },
+
+            performSemanticSearch() {
+                if (this.semanticSearch.length > 2) {
+                    fetch(`/api/search?query=${this.semanticSearch}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.filteredIncidents = data;
+                            this.renderIncidents();
+                        });
+                } else {
+                    this.filterIncidents();
+                }
+            },
+
+            handleNewIncident(data) {
+                this.incidents.unshift(data);
+                this.filterIncidents();
+                this.showToast(data.title);
+            },
+
+            showToast(title) {
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-5 right-5 bg-blue-500 text-white py-2 px-4 rounded-lg shadow-lg animate-bounce';
+                toast.innerText = `New Incident: ${title}`;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.remove();
+                }, 5000);
+            },
+
+            renderIncidents() {
+                const grid = document.getElementById('incident-grid');
+                grid.innerHTML = '';
+                this.filteredIncidents.forEach(incident => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 ease-in-out';
+                    card.innerHTML = `
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">${incident.title}</h3>
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full ${this.getPriorityClass(incident.priority)}">${incident.priority}</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">${incident.category}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-medium ${this.getStatusClass(incident.status)}">${incident.status}</span>
+                                <a href="/incidents/${incident.id}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 font-semibold text-sm transition">
+                                    View Details <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            },
+
+            getPriorityClass(priority) {
+                switch (priority) {
+                    case 'Critical': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+                    case 'High': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+                    case 'Medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+                    case 'Low': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+                }
+            },
+
+            getStatusClass(status) {
+                switch (status) {
+                    case 'New': return 'text-blue-500';
+                    case 'In Progress': return 'text-purple-500';
+                    case 'Resolved': return 'text-green-500';
+                    case 'Closed': return 'text-gray-500';
+                    default: return 'text-gray-500';
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

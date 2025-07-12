@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Triage CoPilot</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --background-light: #f3f4f6;
+            --background-dark: #111827;
+            --text-light: #1f2937;
+            --text-dark: #f9fafb;
+        }
+        .transition-colors {
+            transition-property: background-color, border-color, color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-dark transition-colors" x-data="{ darkMode: true }" :class="{'dark': darkMode === true}">
+    <div id="app" class="flex flex-col min-h-screen">
+        <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-4">
+                        <i class="fas fa-robot text-2xl text-indigo-500"></i>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">AI Triage CoPilot</h1>
+                    </div>
+                    <nav class="hidden md:flex items-center space-x-8">
+                        <a href="{{ url_for('dashboard.index') }}" class="text-gray-600 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">Dashboard</a>
+                        <a href="{{ url_for('incidents.new_incident') }}" class="text-gray-600 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">Submit Incident</a>
+                        <a href="{{ url_for('auth.login') }}" class="text-gray-600 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">Login</a>
+                    </nav>
+                    <div class="flex items-center space-x-4">
+                        <button @click="darkMode = !darkMode" class="w-12 h-6 rounded-full p-1 bg-gray-300 dark:bg-gray-700 relative transition-colors duration-500 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <div class="w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ease-in-out" :class="{'translate-x-6': darkMode, 'translate-x-0': !darkMode}"></div>
+                        </button>
+                        <button class="md:hidden">
+                            <i class="fas fa-bars text-2xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="bg-white dark:bg-gray-800 shadow-inner">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-600 dark:text-gray-400">
+                <p>&copy; 2025 AI Triage CoPilot. All rights reserved.</p>
+                <p class="text-sm mt-2">Modernizing incident response with AI.</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

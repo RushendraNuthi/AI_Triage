@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div class="p-8">
+            <header class="mb-6 flex justify-between items-start">
+                <div>
+                    <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white">{{ incident.title }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Reported by {{ incident.reporter_name }} on {{ incident.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+                <span class="px-3 py-1 text-xs font-semibold rounded-full" :class="{
+                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': '{{ incident.priority }}' === 'Critical',
+                    'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200': '{{ incident.priority }}' === 'High',
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': '{{ incident.priority }}' === 'Medium',
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': '{{ incident.priority }}' === 'Low'
+                }">{{ incident.priority }}</span>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-lg mb-8">
+                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-600 dark:text-gray-400">Category</h3>
+                    <p class="text-gray-900 dark:text-white">{{ incident.category }}</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-600 dark:text-gray-400">Status</h3>
+                    <p class="font-bold" :class="{
+                        'text-blue-500': '{{ incident.status }}' === 'New',
+                        'text-purple-500': '{{ incident.status }}' === 'In Progress',
+                        'text-green-500': '{{ incident.status }}' === 'Resolved',
+                        'text-gray-500': '{{ incident.status }}' === 'Closed'
+                    }">{{ incident.status }}</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-600 dark:text-gray-400">Source System</h3>
+                    <p class="text-gray-900 dark:text-white">{{ incident.source_system }}</p>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Description</h3>
+                <div class="prose dark:prose-dark max-w-none text-gray-700 dark:text-gray-300">
+                    {{ incident.description }}
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Affected Entities</h3>
+                <p class="text-gray-700 dark:text-gray-300">{{ incident.affected_entities }}</p>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Suggested Remediation</h3>
+                <div class="prose dark:prose-dark max-w-none text-gray-700 dark:text-gray-300">
+                    {{ incident.suggested_remediation | markdown }}
+                </div>
+            </div>
+
+            {% if kb_article %}
+            <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Knowledge Base Article</h3>
+                <div class="prose dark:prose-dark max-w-none text-gray-700 dark:text-gray-300">
+                    {{ kb_article.content | markdown }}
+                </div>
+                <div class="mt-4 flex items-center">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mr-4">Was this helpful?</p>
+                    <button hx-post="{{ url_for('api.feedback', category=kb_article.category, feedback_type='upvote') }}" hx-swap="outerHTML" class="text-green-500 hover:text-green-700 transition mr-2">
+                        <i class="fas fa-thumbs-up"></i> ({{ kb_article.upvotes }})
+                    </button>
+                    <button hx-post="{{ url_for('api.feedback', category=kb_article.category, feedback_type='downvote') }}" hx-swap="outerHTML" class="text-red-500 hover:text-red-700 transition">
+                        <i class="fas fa-thumbs-down"></i> ({{ kb_article.downvotes }})
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="bg-gray-50 dark:bg-gray-700 px-8 py-4 text-right">
+            <a href="{{ url_for('dashboard.index') }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 font-semibold transition">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div class="p-8">
+            <header class="mb-6">
+                <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white">{{ incident.title }}</h2>
+            </header>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-lg">
+                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-600 dark:text-gray-400">Category</h3>
+                    <p class="text-gray-900 dark:text-white">{{ incident.category }}</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-600 dark:text-gray-400">Priority</h3>
+                    <p class="font-bold" :class="{
+                        'text-red-500': '{{ incident.priority }}' === 'High',
+                        'text-yellow-500': '{{ incident.priority }}' === 'Medium',
+                        'text-green-500': '{{ incident.priority }}' === 'Low'
+                    }">{{ incident.priority }}</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-600 dark:text-gray-400">Status</h3>
+                    <p class="font-bold" :class="{
+                        'text-blue-500': '{{ incident.status }}' === 'Open',
+                        'text-purple-500': '{{ incident.status }}' === 'In Progress',
+                        'text-green-500': '{{ incident.status }}' === 'Resolved',
+                        'text-gray-500': '{{ incident.status }}' === 'Closed'
+                    }">{{ incident.status }}</p>
+                </div>
+            </div>
+            <div class="mt-8">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Description</h3>
+                <div class="prose dark:prose-dark max-w-none text-gray-700 dark:text-gray-300">
+                    {{ incident.description }}
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 dark:bg-gray-700 px-8 py-4 text-right">
+            <a href="{{ url_for('dashboard.index') }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 font-semibold transition">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

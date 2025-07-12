@@ -1,0 +1,12 @@
+Flask
+Flask-SocketIO
+Flask-Login
+Flask-WTF
+Flask-Markdown
+APScheduler
+python-dotenv
+sentence-transformers
+faiss-cpu
+WeasyPrint
+pytest
+Werkzeug
